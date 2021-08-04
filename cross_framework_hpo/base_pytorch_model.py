@@ -5,7 +5,7 @@ import torch
 import statistics
 
 
-class BasePytorchTrainer(pl.LightningModule):
+class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
         super().__init__()
         self.model = None
