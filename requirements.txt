@@ -1,0 +1,17 @@
+hyperspaces==0.5.0
+spaceray==0.2.6
+pytorch-lightning==1.4.0
+ray==1.4.1
+redis==3.5.3
+scikit-image==0.17.2
+scikit-learn==0.24.0
+scikit-optimize==0.8.1
+scipy==1.5.2
+tensorflow==2.4.0
+tensorflow-datasets==4.0.1
+tensorflow-estimator==2.3.0
+tensorflow-metadata==0.24.0
+torch==1.6.0
+torchmetrics==0.4.1
+torchvision==0.7.0
+wandb==0.10.17
