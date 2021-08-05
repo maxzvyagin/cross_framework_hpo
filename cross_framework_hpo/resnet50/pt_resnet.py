@@ -3,7 +3,7 @@ import torchvision.models as models
 
 
 def resnet_pt_objective(config):
-    model = models.resnset50(pretrained=False)
+    model = models.resnet50(pretrained=False)
     return base_pytorch_function(config, supplied_model=model)
 
 
