@@ -2,7 +2,7 @@ import tensorflow as tf
 from cross_framework_hpo.base_tensorflow_model import base_tensorflow_function
 
 def vgg_tf_objective(config):
-    model =tf.keras.applications.vgg16.VGG16(weights=None, input_shape=(3, 32, 32), classes=100)
+    model =tf.keras.applications.vgg16.VGG16(weights=None, input_shape=(3, 32, 32), classes=100, pooling=None)
     return base_tensorflow_function(config=config, model=model)
 
 if __name__ == "__main__":
