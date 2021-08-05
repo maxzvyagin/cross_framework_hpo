@@ -84,3 +84,17 @@ class BasePytorchModel(pl.LightningModule):
         avg_accuracy = statistics.mean(accuracy)
         self.test_accuracy = avg_accuracy
 
+def base_pytorch_function(config, supplied_model):
+    torch.manual_seed(0)
+    model_class = BasePytorchModel(config)
+    model_class.model = supplied_model
+    model_class.model.train()
+    try:
+        trainer = pl.Trainer(max_epochs=config['epochs'], gpus=[0])
+    except:
+        print("WARNING: training on CPU only, GPU[0] not found.")
+        trainer = pl.Trainer(max_epochs=config['epochs'])
+    trainer.fit(model_class)
+    trainer.test(model_class)
+    return (model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history,
+            model_class.latest_training_loss_history)

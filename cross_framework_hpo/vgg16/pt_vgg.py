@@ -7,7 +7,7 @@ import torch
 def resnet_pt_objective(config):
     torch.manual_seed(0)
     model_class = BasePytorchModel(config)
-    model_class.model = models.resnet50(pretrained=False)
+    model_class.model = models.vgg16(pretrained=False)
     model_class.model.train()
     try:
         trainer = pl.Trainer(max_epochs=config['epochs'], gpus=[0])
