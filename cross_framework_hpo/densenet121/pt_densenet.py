@@ -3,7 +3,7 @@ import torchvision.models as models
 
 
 def densenet_pt_objective(config):
-    model = models.densenet121(pretrained=False)
+    model = models.densenet121(pretrained=False, num_classes=1000)
     return base_pytorch_function(config, supplied_model=model)
 
 

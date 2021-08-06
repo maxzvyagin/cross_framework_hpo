@@ -3,7 +3,7 @@ import torchvision.models as models
 
 
 def vgg_pt_objective(config):
-    model = models.vgg16(pretrained=False)
+    model = models.vgg16(pretrained=False, num_classes=100)
     return base_pytorch_function(config, supplied_model=model)
 
 
