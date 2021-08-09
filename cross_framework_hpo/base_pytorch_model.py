@@ -21,13 +21,13 @@ class BasePytorchModel(pl.LightningModule):
         self.training_loss_history = []
 
     def train_dataloader(self):
-        return torch.utils.data.DataLoader(torchvision.datasets.CIFAR100("/tmp", train=True,
+        return torch.utils.data.DataLoader(torchvision.datasets.CIFAR10("/tmp", train=True,
                                                                       transform=torchvision.transforms.ToTensor(),
                                                                       target_transform=None, download=True),
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
 
     def test_dataloader(self):
-        return torch.utils.data.DataLoader(torchvision.datasets.CIFAR100("/tmp", train=False,
+        return torch.utils.data.DataLoader(torchvision.datasets.CIFAR10("/tmp", train=False,
                                                                       transform=torchvision.transforms.ToTensor(),
                                                                       target_transform=None, download=True),
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
