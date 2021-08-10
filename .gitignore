@@ -131,3 +131,10 @@ dmypy.json
 # model result directories
 cross_framework_hpo/cifar10
 cross_framewor_hpo/cifar100
+cross_framework_hpo/cifar100/densenet_lambda/.DS_Store
+*.index
+*.pb
+*.data-00000-of-00001
+*.pt
+*.pkl
+*.csv
