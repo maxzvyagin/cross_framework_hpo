@@ -4,7 +4,7 @@ from cross_framework_hpo.vgg16.updated_torchvision_vgg import vgg16
 
 
 def vgg_pt_objective(config):
-    model = vgg16(pretrained=False, num_classes=100)
+    model = vgg16(pretrained=False, num_classes=10)
     return base_pytorch_function(config, supplied_model=model)
 
 
