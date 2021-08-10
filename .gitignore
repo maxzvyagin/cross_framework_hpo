@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# model result directories
+cross_framework_hpo/cifar10
+cross_framewor_hpo/cifar100
