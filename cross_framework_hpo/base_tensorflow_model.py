@@ -8,7 +8,7 @@ def base_tensorflow_function(config, model):
     opt = tf.keras.optimizers.Adam(learning_rate=config['learning_rate'], epsilon=config['adam_epsilon'])
 
     model.compile(optimizer=opt,
-                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(),
                   metrics=['accuracy'])
 
     res = model.fit(x_train, y_train, epochs=config['epochs'], batch_size=int(config['batch_size']), shuffle=False)
