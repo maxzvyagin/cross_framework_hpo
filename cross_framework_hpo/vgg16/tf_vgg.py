@@ -6,5 +6,7 @@ def vgg_tf_objective(config):
     return base_tensorflow_function(config=config, model=model)
 
 if __name__ == "__main__":
-    test_config = {'batch_size': 50, 'learning_rate': .001, 'epochs': 10, 'adam_epsilon': 10**-9}
-    res = vgg_tf_objective(test_config)
+    test_config = {'batch_size': 904, 'learning_rate': 0.074552791, 'epochs': 26, 'adam_epsilon': 0.536216016}
+    tf_test_acc, tf_model, tf_training_history = vgg_tf_objective(test_config)
+    tf_model.save('../cifar10/vgg_lambda/dual_train_d24e215e' + 'tf_model')
+    print("Accuracy is {}".format(tf_test_acc))
