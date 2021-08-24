@@ -9,9 +9,9 @@ def vgg_pt_objective(config):
 
 
 if __name__ == "__main__":
-    test_config = {'batch_size': 904, 'learning_rate': 0.074552791, 'epochs': 26, 'adam_epsilon': 0.536216016}
+    test_config = {'batch_size': 532, 'learning_rate': 0.074552791, 'epochs': 26, 'adam_epsilon': 0.536216016}
     pt_test_acc, pt_model, pt_average_training_history, pt_latest_training_history = vgg_pt_objective(test_config)
-    torch.save(pt_model.state_dict(), '../cifar10/vgg_lambda/dual_train_d24e215e' + '.pt_model.pt')
+    torch.save(pt_model.state_dict(), '../cifar10/vgg_lambda/dual_train_d24f6410' + '.pt_model.pt')
     print("Accuracy is {}".format(pt_test_acc))
 
 
