@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-def base_tensorflow_function(config, model):
-    tf.random.set_seed(0)
+def base_tensorflow_function(config, model, seed):
+    tf.random.set_seed(seed)
     cifar = tf.keras.datasets.cifar10
     (x_train, y_train), (x_test, y_test) = cifar.load_data()
     x_train, x_test = x_train / 255.0, x_test / 255.0
