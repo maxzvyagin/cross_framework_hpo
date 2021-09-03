@@ -6,7 +6,7 @@ def vgg_tf_objective(config, seed):
     return base_tensorflow_function(config=config, model=model, seed=seed)
 
 if __name__ == "__main__":
-    test_config = {'batch_size': 532, 'learning_rate': 0.074552791, 'epochs': 26, 'adam_epsilon': 0.536216016}
+    test_config = {'batch_size': 128, 'learning_rate': 0.001, 'epochs': 10, 'adam_epsilon': 1e-8}
     tf_test_acc, tf_model, tf_training_history = vgg_tf_objective(test_config, seed=0)
     print("Accuracy is {}".format(tf_test_acc))
 
