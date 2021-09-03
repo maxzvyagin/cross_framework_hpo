@@ -2,9 +2,9 @@ from cross_framework_hpo.base_pytorch_model import base_pytorch_function
 import torchvision.models as models
 
 
-def densenet_pt_objective(config):
+def densenet_pt_objective(config, seed):
     model = models.densenet121(pretrained=False, num_classes=10)
-    return base_pytorch_function(config, supplied_model=model)
+    return base_pytorch_function(config, supplied_model=model, seed=seed)
 
 
 if __name__ == "__main__":

@@ -23,43 +23,41 @@ def dual_train(config, extra_data_dir):
     # make directory to save weights in
     model_directory = os.path.join(extra_data_dir, 'model_weights/', wandb.run.name)
 
-    pt_test_acc, pt_model, pt_average_training_history, pt_latest_training_history = PT_OBJECTIVE(config)
-    pt_model.eval()
-    search_results = {'pt_test_acc': pt_test_acc}
-    # save torch model
-    torch.save(pt_model.state_dict(), model_directory + '.pt_model.pt')
+    # three random seeds
+    for i in [0, 77, 1234]:
 
-    # to prevent weird OOM errors
-    del pt_model
-    torch.cuda.empty_cache()
+        pt_test_acc, pt_model, pt_training_history = PT_OBJECTIVE(config, seed=i)
+        pt_model.eval()
+        search_results = {'pt_test_acc_seed{}'.format(i): pt_test_acc}
+        # save torch model
+        torch.save(pt_model.state_dict(), model_directory + '_pt_model_seed{}.pt'.format(i))
 
-    tf_test_acc, tf_model, tf_training_history = TF_OBJECTIVE(config)
-    tf_model.save(model_directory + 'tf_model')
+        # to prevent weird OOM errors
+        del pt_model
+        torch.cuda.empty_cache()
 
-    accuracy_diff = abs(pt_test_acc - tf_test_acc)
-    # all the logging
-    search_results['tf_test_acc'] = tf_test_acc
-    search_results['accuracy_diff'] = accuracy_diff
-    search_results['tf_training_loss'] = tf_training_history
-    search_results['pt_average_training_loss'] = pt_average_training_history
-    search_results['pt_latest_training_loss'] = pt_latest_training_history
-    # log inidividual metrics to wanbd
-    for key, value in search_results.items():
-        wandb.log({key: value})
-    # log custom training and validation curve charts to wandb
-    data = [[x, y] for (x, y) in zip(list(range(len(pt_latest_training_history))), pt_latest_training_history)]
-    table = wandb.Table(data=data, columns=["epochs", "training_loss"])
-    wandb.log({"PT Latest Training Loss": wandb.plot.line(table, "epochs", "training_loss", title="PT Latest Training "
-                                                                                                  "Loss")})
+        tf_test_acc, tf_model, tf_training_history = TF_OBJECTIVE(config, seed=i)
+        tf_model.save(model_directory + 'tf_model_seed{}'.format(i))
 
-    data = [[x, y] for (x, y) in zip(list(range(len(pt_average_training_history))), pt_average_training_history)]
-    table = wandb.Table(data=data, columns=["epochs", "training_loss"])
-    wandb.log({"PT Average Training Loss": wandb.plot.line(table, "epochs", "training_loss", title="PT Average "
-                                                                                                   "Training Loss")})
+        accuracy_diff = abs(pt_test_acc - tf_test_acc)
+        # all the logging
+        search_results['tf_test_acc_seed{}'.format(i)] = tf_test_acc
+        search_results['accuracy_diff_seed{}'.format(i)] = accuracy_diff
+        search_results['tf_training_loss_seed{}'.format(i)] = tf_training_history
+        search_results['pt_training_loss_seed{}'.format(i)] = pt_training_history
+        # log inidividual metrics to wanbd
+        for key, value in search_results.items():
+            wandb.log({key: value})
+        # log custom training and validation curve charts to wandb
+        data = [[x, y] for (x, y) in zip(list(range(len(pt_training_history))), pt_training_history)]
+        table = wandb.Table(data=data, columns=["epochs", "training_loss"])
+        wandb.log({"PT Latest Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss", title="PT Training Loss"
+                                                                                                      "Loss")})
 
-    data = [[x, y] for (x, y) in zip(list(range(len(tf_training_history))), tf_training_history)]
-    table = wandb.Table(data=data, columns=["epochs", "training_loss"])
-    wandb.log({"TF Training Loss": wandb.plot.line(table, "epochs", "training_loss", title="TF Training Loss")})
+        data = [[x, y] for (x, y) in zip(list(range(len(tf_training_history))), tf_training_history)]
+        table = wandb.Table(data=data, columns=["epochs", "training_loss"])
+        wandb.log({"TF Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss", title="TF Training Loss")})
+
     try:
         tune.report(**search_results)
     except:
@@ -91,7 +89,7 @@ if __name__ == "__main__":
         PT_OBJECTIVE = densenet_pt_objective
         TF_OBJECTIVE = densenet_tf_objective
     else:
-        sys.exit("ERROR: ")
+        sys.exit("ERROR: not a valid network.")
 
     results = args.out
     try:
@@ -102,6 +100,6 @@ if __name__ == "__main__":
         pass
     main = os.getcwd()
     results = os.path.join(main, results)
-    spaceray.run_experiment(dual_train, args.json, args.trials, args.out, mode="max", metric="accuracy_diff",
+    spaceray.run_experiment(dual_train, args.json, args.trials, args.out, mode="max", metric="accuracy_diff_seed0",
                             start_space=0, project_name=args.wandb_name, extra_data_dir=results, num_splits=8,
                             wandb_key="f89dd177ee1c0e61382850a5a0cf389910abb3d2", cpu=1, gpu=int(args.gpus))

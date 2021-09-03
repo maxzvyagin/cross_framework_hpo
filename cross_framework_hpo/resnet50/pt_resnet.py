@@ -2,9 +2,9 @@ from cross_framework_hpo.base_pytorch_model import base_pytorch_function
 import torchvision.models as models
 
 
-def resnet_pt_objective(config):
+def resnet_pt_objective(config, seed):
     model = models.resnet50(pretrained=False, num_classes=10)
-    return base_pytorch_function(config, supplied_model=model)
+    return base_pytorch_function(config, supplied_model=model, seed=seed)
 
 
 if __name__ == "__main__":
