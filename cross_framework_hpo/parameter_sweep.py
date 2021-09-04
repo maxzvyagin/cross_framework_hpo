@@ -1,5 +1,6 @@
 import os
 import sys
+import tensorflow as tf
 
 from cross_framework_hpo.densenet121.tf_densenet import densenet_tf_objective
 from cross_framework_hpo.densenet121.pt_densenet import densenet_pt_objective
@@ -57,6 +58,10 @@ def dual_train(config, extra_data_dir):
         data = [[x, y] for (x, y) in zip(list(range(len(tf_training_history))), tf_training_history)]
         table = wandb.Table(data=data, columns=["epochs", "training_loss"])
         wandb.log({"TF Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss", title="TF Training Loss")})
+
+        del tf_model
+        tf.keras.backend.clear_session()
+        torch.cuda.empty_cache()
 
     try:
         tune.report(**search_results)
