@@ -25,43 +25,51 @@ def dual_train(config, extra_data_dir):
     model_directory = os.path.join(extra_data_dir, 'model_weights/', wandb.run.name)
 
     # three random seeds
+    search_results = dict()
     for i in [0, 77, 1234]:
 
         pt_test_acc, pt_model, pt_training_history = PT_OBJECTIVE(config, seed=i)
         pt_model.eval()
-        search_results = {'pt_test_acc_seed{}'.format(i): pt_test_acc}
+        search_results['pt_test_acc_seed{}'.format(i)] = pt_test_acc
+        search_results['pt_training_loss_seed{}'.format(i)] = pt_training_history
         # save torch model
         torch.save(pt_model.state_dict(), model_directory + '_pt_model_seed{}.pt'.format(i))
+        # wandb logging
+        data = [[x, y] for (x, y) in zip(list(range(len(pt_training_history))), pt_training_history)]
+        table = wandb.Table(data=data, columns=["epochs", "training_loss"])
+        wandb.log({"PT Latest Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss",
+                                                                                title="PT Training Loss"
+                                                                                      "Loss")})
 
         # to prevent weird OOM errors
         del pt_model
         torch.cuda.empty_cache()
 
+    for i in [0, 77, 1234]:
+
         tf_test_acc, tf_model, tf_training_history = TF_OBJECTIVE(config, seed=i)
         tf_model.save(model_directory + 'tf_model_seed{}'.format(i))
+
+        pt_test_acc = search_results['pt_test_acc_seed{}'.format(i)]
 
         accuracy_diff = abs(pt_test_acc - tf_test_acc)
         # all the logging
         search_results['tf_test_acc_seed{}'.format(i)] = tf_test_acc
         search_results['accuracy_diff_seed{}'.format(i)] = accuracy_diff
         search_results['tf_training_loss_seed{}'.format(i)] = tf_training_history
-        search_results['pt_training_loss_seed{}'.format(i)] = pt_training_history
-        # log inidividual metrics to wanbd
-        for key, value in search_results.items():
-            wandb.log({key: value})
-        # log custom training and validation curve charts to wandb
-        data = [[x, y] for (x, y) in zip(list(range(len(pt_training_history))), pt_training_history)]
-        table = wandb.Table(data=data, columns=["epochs", "training_loss"])
-        wandb.log({"PT Latest Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss", title="PT Training Loss"
-                                                                                                      "Loss")})
 
+
+        # log custom training and validation curve charts to wandb
         data = [[x, y] for (x, y) in zip(list(range(len(tf_training_history))), tf_training_history)]
         table = wandb.Table(data=data, columns=["epochs", "training_loss"])
         wandb.log({"TF Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss", title="TF Training Loss")})
 
         del tf_model
         tf.keras.backend.clear_session()
-        torch.cuda.empty_cache()
+
+    # log inidividual metrics to wanbd
+    for key, value in search_results.items():
+        wandb.log({key: value})
 
     try:
         tune.report(**search_results)
