@@ -114,7 +114,7 @@ class BasePytorchModel(pl.LightningModule):
     def test_epoch_end(self, outputs):
         loss = []
         for x in outputs:
-            loss.append(float(x['test_loss']))
+            loss.append(float(x['loss']))
         avg_loss = statistics.mean(loss)
         self.test_loss = avg_loss
         accuracy = []
