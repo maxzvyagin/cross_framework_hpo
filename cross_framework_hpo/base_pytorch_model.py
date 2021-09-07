@@ -68,6 +68,7 @@ class BasePytorchModel(pl.LightningModule):
         return self.model(x)
 
     def validation_step(self, val_batch, batch_idx):
+        pdb.set_trace()
         x, y = val_batch
         out = self.forward(x)
         loss = self.criterion(out, y)
