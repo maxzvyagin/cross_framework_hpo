@@ -71,7 +71,7 @@ class BasePytorchModel(pl.LightningModule):
         # pdb.set_trace()
         x, y = val_batch
         out = self.forward(x)
-        loss = self.criterion(out, y.flatten())
+        loss = self.criterion(out, y.long().flatten())
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
