@@ -73,21 +73,21 @@ class BasePytorchModel(pl.LightningModule):
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return loss
+        return {"val_loss": loss}
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return loss
+        return {"train_loss": loss}
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return loss
+        return {"test_loss": loss}
 
     # def training_step_end(self, outputs):
     #     loss = self.criterion(outputs['forward'], outputs['expected'])
@@ -139,7 +139,7 @@ def base_pytorch_function(config, supplied_model, seed):
     except:
         print("WARNING: training on CPU only, GPU[0] not found.")
         trainer = pl.Trainer(max_epochs=config['epochs'])
+    pdb.set_trace()
     trainer.fit(model_class)
     trainer.test(model_class)
-    pdb.set_trace()
     return model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history
