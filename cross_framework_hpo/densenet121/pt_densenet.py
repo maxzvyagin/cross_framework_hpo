@@ -8,6 +8,6 @@ def densenet_pt_objective(config, seed):
 
 
 if __name__ == "__main__":
-    test_config = {'batch_size': 64, 'learning_rate': .001, 'epochs': 1, 'adam_epsilon': 1e-7}
-    res = densenet_pt_objective(test_config)
+    test_config = {'batch_size': 64, 'learning_rate': .001, 'epochs': 10, 'adam_epsilon': 1e-7}
+    res = densenet_pt_objective(test_config, seed=0)
     print("Accuracy is {}".format(res[0]))
