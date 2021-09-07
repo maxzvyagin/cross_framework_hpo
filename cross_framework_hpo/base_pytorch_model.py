@@ -69,21 +69,21 @@ class BasePytorchModel(pl.LightningModule):
 
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
-        out = self.forward(x).long()
-        loss = self.criterion(out, y)
+        out = self.forward(x)
+        loss = self.criterion(out, y.long())
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
-        out = self.forward(x).long()
+        out = self.forward(x)
         loss = self.criterion(out, y)
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
-        out = self.forward(x).long()
+        out = self.forward(x)
         loss = self.criterion(out, y)
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
