@@ -30,7 +30,7 @@ class CIFAR10Dataset(torch.utils.data.Dataset):
         return len(self.labels)
 
     def __getitem__(self, i):
-        return self.labels[i].astype("float32"), self.targets[i].astype("long")
+        return self.labels[i].astype("float32"), self.targets[i].astype("float32")
 
 class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
