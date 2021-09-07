@@ -71,23 +71,25 @@ class BasePytorchModel(pl.LightningModule):
         # pdb.set_trace()
         x, y = val_batch
         out = self.forward(x)
-        loss = self.criterion(out, y.long().flatten())
-        self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return {"val_loss": loss}
+        y = y.long().flatten()
+        loss = self.criterion(out, y)
+        acc = self.accuracy(out, y)
+        return {"loss": loss, "logs": {"val_loss": loss, 'val_acc': acc}}
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
-        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return {"train_loss": loss}
+        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return {"loss": loss, "logs": {"train_loss": loss}}
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
         out = self.forward(x)
-        loss = self.criterion(out, y.long().flatten())
-        self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return {"test_loss": loss}
+        y = y.long().flatten()
+        loss = self.criterion(out, y)
+        acc = self.accuracy(out, y)
+        return {"loss": loss, "logs": {"test_loss": loss, 'test_acc': acc}}
 
     # def training_step_end(self, outputs):
     #     loss = self.criterion(outputs['forward'], outputs['expected'])
