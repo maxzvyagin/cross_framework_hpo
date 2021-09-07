@@ -51,7 +51,7 @@ class BasePytorchModel(pl.LightningModule):
         return torch.utils.data.DataLoader(CIFAR10Dataset(split="train"),
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
 
-    def validation_dataloader(self):
+    def val_dataloader(self):
         return torch.utils.data.DataLoader(CIFAR10Dataset(split="train"),
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
 
