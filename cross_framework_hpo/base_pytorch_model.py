@@ -30,7 +30,7 @@ class CIFAR10Dataset(torch.utils.data.Dataset):
         return len(self.labels)
 
     def __getitem__(self, i):
-        return self.labels[i].astype("float32"), self.targets[i].astype("float32")
+        return self.labels[i], self.targets[i]
 
 class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
@@ -70,7 +70,7 @@ class BasePytorchModel(pl.LightningModule):
     def validation_step(self, val_batch, batch_idx):
         x, y = val_batch
         out = self.forward(x)
-        loss = self.criterion(out.float(), y.float())
+        loss = self.criterion(out, y)
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
