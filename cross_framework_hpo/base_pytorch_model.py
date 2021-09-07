@@ -81,7 +81,7 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
-        return {"loss": loss, "logs": {"val_loss": loss.detach(), 'val_acc': acc.detach()}}
+        return {"loss": loss, "val_acc": acc, "logs": {"val_loss": loss.detach(), 'val_acc': acc.detach()}}
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
@@ -89,7 +89,7 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
-        return {"loss": loss, "logs": {"test_loss": loss.detach(), 'test_acc': acc.detach()}}
+        return {"loss": loss, "test_acc": acc, "logs": {"test_loss": loss.detach(), 'test_acc': acc.detach()}}
 
     def training_epoch_end(self, outputs):
         loss = []
