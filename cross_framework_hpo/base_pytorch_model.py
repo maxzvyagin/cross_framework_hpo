@@ -1,3 +1,5 @@
+import pdb
+
 from torch import nn
 import pytorch_lightning as pl
 import torchvision
@@ -138,4 +140,5 @@ def base_pytorch_function(config, supplied_model, seed):
         trainer = pl.Trainer(max_epochs=config['epochs'])
     trainer.fit(model_class)
     trainer.test(model_class)
+    pdb.set_trace()
     return model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history
