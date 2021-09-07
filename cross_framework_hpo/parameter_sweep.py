@@ -47,7 +47,7 @@ def dual_train(config, extra_data_dir):
 
     for i in [0, 77, 1234]:
 
-        tf_test_acc, tf_model, tf_training_history = TF_OBJECTIVE(config, seed=i)
+        tf_test_acc, tf_model, tf_training_history, num_epochs_run = TF_OBJECTIVE(config, seed=i)
         tf_model.save(model_directory + 'tf_model_seed{}'.format(i))
 
         pt_test_acc = search_results['pt_test_acc_seed{}'.format(i)]
@@ -57,7 +57,7 @@ def dual_train(config, extra_data_dir):
         search_results['tf_test_acc_seed{}'.format(i)] = tf_test_acc
         search_results['accuracy_diff_seed{}'.format(i)] = accuracy_diff
         search_results['tf_training_loss_seed{}'.format(i)] = tf_training_history
-
+        search_results['tf_num_epochs_run_seed{}'.format(i)] = num_epochs_run
 
         # log custom training and validation curve charts to wandb
         data = [[x, y] for (x, y) in zip(list(range(len(tf_training_history))), tf_training_history)]
