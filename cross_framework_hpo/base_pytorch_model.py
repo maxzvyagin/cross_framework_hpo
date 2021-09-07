@@ -43,9 +43,8 @@ class BasePytorchModel(pl.LightningModule):
         self.test_accuracy = None
         self.accuracy = pl.metrics.Accuracy()
         self.training_loss_history = []
-        self.avg_training_loss_history = []
-        self.latest_training_loss_history = []
-        self.training_loss_history = []
+        self.validation_loss_history = []
+        self.validation_acc_history = []
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(CIFAR10Dataset(split="train"),
@@ -67,6 +66,14 @@ class BasePytorchModel(pl.LightningModule):
     def forward(self, x):
         return self.model(x)
 
+    def training_step(self, train_batch, batch_idx):
+        x, y = train_batch
+        out = self.forward(x)
+        loss = self.criterion(out, y.long().flatten())
+        self.latest_training_loss.append(loss)
+        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        return {"loss": loss, "logs": {"train_loss": loss.detach()}}
+
     def validation_step(self, val_batch, batch_idx):
         # pdb.set_trace()
         x, y = val_batch
@@ -74,14 +81,7 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
-        return {"loss": loss, "logs": {"val_loss": loss, 'val_acc': acc}}
-
-    def training_step(self, train_batch, batch_idx):
-        x, y = train_batch
-        out = self.forward(x)
-        loss = self.criterion(out, y.long().flatten())
-        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return {"loss": loss, "logs": {"train_loss": loss}}
+        return {"loss": loss, "logs": {"val_loss": loss.detach(), 'val_acc': acc.detach()}}
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
@@ -89,47 +89,40 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
-        return {"loss": loss, "logs": {"test_loss": loss, 'test_acc': acc}}
+        return {"loss": loss, "logs": {"test_loss": loss.detach(), 'test_acc': acc.detach()}}
 
-    # def training_step_end(self, outputs):
-    #     loss = self.criterion(outputs['forward'], outputs['expected'])
-    #     logs = {'train_loss': loss}
-    #     # pdb.set_trace()
-    #     return {'loss': loss, 'logs': logs}
-    #
-    # def training_epoch_end(self, outputs):
-    #     # pdb.set_trace()
-    #     loss = []
-    #     for x in outputs:
-    #         loss.append(float(x['loss']))
-    #     avg_loss = statistics.mean(loss)
-    #     # tensorboard_logs = {'train_loss': avg_loss}
-    #     self.avg_training_loss_history.append(avg_loss)
-    #     self.latest_training_loss_history.append(loss[-1])
-    #     # return {'avg_train_loss': avg_loss, 'log': tensorboard_logs}
+    def training_epoch_end(self, outputs):
+        loss = []
+        for x in outputs:
+            loss.append(float(x['loss']))
+        avg_loss = statistics.mean(loss)
+        self.training_loss_history.append(avg_loss)
+        return {'avg_train_loss': avg_loss}
 
-    # def test_step(self, test_batch, batch_idx):
-    #     x, y = test_batch
-    #     return {'forward': self.forward(x), 'expected': y}
+    def validation_epoch_end(self, outputs):
+        loss = []
+        for x in outputs:
+            loss.append(float(x['loss']))
+        avg_loss = statistics.mean(loss)
+        self.validation_loss_history.append(avg_loss)
+        accuracy = []
+        for x in outputs:
+            accuracy.append(float(x['val_acc']))
+        avg_accuracy = statistics.mean(accuracy)
+        return {'avg_val_loss': avg_loss, 'avg_val_acc': avg_accuracy}
 
-    # def test_step_end(self, outputs):
-    #     loss = self.criterion(outputs['forward'], outputs['expected'])
-    #     accuracy = self.accuracy(outputs['forward'], outputs['expected'])
-    #     logs = {'test_loss': loss, 'test_accuracy': accuracy}
-    #     return {'test_loss': loss, 'logs': logs, 'test_accuracy': accuracy}
-    #
-    # def test_epoch_end(self, outputs):
-    #     loss = []
-    #     for x in outputs:
-    #         loss.append(float(x['test_loss']))
-    #     avg_loss = statistics.mean(loss)
-    #     # tensorboard_logs = {'test_loss': avg_loss}
-    #     self.test_loss = avg_loss
-    #     accuracy = []
-    #     for x in outputs:
-    #         accuracy.append(float(x['test_accuracy']))
-    #     avg_accuracy = statistics.mean(accuracy)
-    #     self.test_accuracy = avg_accuracy
+    def test_epoch_end(self, outputs):
+        loss = []
+        for x in outputs:
+            loss.append(float(x['test_loss']))
+        avg_loss = statistics.mean(loss)
+        self.test_loss = avg_loss
+        accuracy = []
+        for x in outputs:
+            accuracy.append(float(x['test_acc']))
+        avg_accuracy = statistics.mean(accuracy)
+        self.test_accuracy = avg_accuracy
+        return {'avg_test_loss': avg_loss, 'avg_test_acc': avg_accuracy}
 
 def base_pytorch_function(config, supplied_model, seed):
     torch.manual_seed(seed)
