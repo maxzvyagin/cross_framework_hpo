@@ -30,7 +30,7 @@ class CIFAR10Dataset(torch.utils.data.Dataset):
         return len(self.images)
 
     def __getitem__(self, i):
-        return self.images[i], self.targets[i]
+        return self.images[i].astype("float32"), self.targets[i]
 
 class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
@@ -71,21 +71,21 @@ class BasePytorchModel(pl.LightningModule):
         pdb.set_trace()
         x, y = val_batch
         out = self.forward(x)
-        loss = self.criterion(out, y)
+        loss = self.criterion(out, y.flatten())
         self.log("val_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def training_step(self, train_batch, batch_idx):
         x, y = train_batch
         out = self.forward(x)
-        loss = self.criterion(out, y)
+        loss = self.criterion(out, y.flatten())
         self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
     def test_step(self, test_batch, batch_idx):
         x, y = test_batch
         out = self.forward(x)
-        loss = self.criterion(out, y)
+        loss = self.criterion(out, y.flatten())
         self.log("test_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return loss
 
