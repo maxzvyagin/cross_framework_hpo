@@ -15,22 +15,22 @@ class CIFAR10Dataset(torch.utils.data.Dataset):
         (x_train, y_train), (x_test, y_test) = cifar.load_data()
         x_train, x_test = x_train / 255.0, x_test / 255.0
         if split == "train":
-            self.labels = x_train[:49000]
+            self.images = x_train[:49000]
             self.targets = y_train[:49000]
         elif split == "val":
-            self.labels = x_train[49000:]
+            self.images = x_train[49000:]
             self.targets = y_train[49000:]
         elif split == "test":
-            self.labels = x_test
+            self.images = x_test
             self.targets = y_test
         else:
             sys.exit("Invalid split argument provided.")
 
     def __len__(self):
-        return len(self.labels)
+        return len(self.images)
 
     def __getitem__(self, i):
-        return self.labels[i], self.targets[i]
+        return self.images[i].float(), self.targets[i]
 
 class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
