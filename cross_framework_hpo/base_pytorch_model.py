@@ -30,7 +30,7 @@ class CIFAR10Dataset(torch.utils.data.Dataset):
         return len(self.images)
 
     def __getitem__(self, i):
-        return self.images[i].float(), self.targets[i]
+        return self.images[i], self.targets[i]
 
 class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
@@ -52,7 +52,7 @@ class BasePytorchModel(pl.LightningModule):
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
 
     def val_dataloader(self):
-        return torch.utils.data.DataLoader(CIFAR10Dataset(split="train"),
+        return torch.utils.data.DataLoader(CIFAR10Dataset(split="val"),
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
 
     def test_dataloader(self):
