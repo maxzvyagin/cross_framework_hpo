@@ -7,6 +7,7 @@ import torch
 import statistics
 import tensorflow as tf
 import sys
+from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 class CIFAR10Dataset(torch.utils.data.Dataset):
     def __init__(self, split):
@@ -70,7 +71,7 @@ class BasePytorchModel(pl.LightningModule):
         x, y = train_batch
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
-        self.log("train_loss", loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("train_loss", loss.detach(), on_epoch=True, prog_bar=False, logger=True)
         return {"loss": loss, "logs": {"train_loss": loss.detach()}}
 
     def validation_step(self, val_batch, batch_idx):
@@ -80,8 +81,8 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
-        self.log("val_loss", loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("val_acc", acc.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("val_loss", loss.detach(), on_epoch=True, prog_bar=True, logger=True)
+        self.log("val_acc", acc.detach(), on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "val_acc": acc, "logs": {"val_loss": loss.detach(), 'val_acc': acc.detach()}}
 
     def test_step(self, test_batch, batch_idx):
@@ -90,8 +91,8 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
-        self.log("test_loss", loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("test_acc", acc.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("test_loss", loss.detach(), on_epoch=True, prog_bar=True, logger=True)
+        self.log("test_acc", acc.detach(), on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "test_acc": acc, "logs": {"test_loss": loss.detach(), 'test_acc': acc.detach()}}
 
     # def training_epoch_end(self, outputs):
@@ -132,12 +133,14 @@ def base_pytorch_function(config, supplied_model, seed):
     model_class = BasePytorchModel(config)
     model_class.model = supplied_model
     model_class.model.train()
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=3)
     try:
-        trainer = pl.Trainer(max_epochs=config['epochs'], gpus=[0])
+        trainer = pl.Trainer(max_epochs=config['epochs'], gpus=[0], callbacks=[early_stop_callback])
     except:
         print("WARNING: training on CPU only, GPU[0] not found.")
-        trainer = pl.Trainer(max_epochs=config['epochs'])
+        trainer = pl.Trainer(max_epochs=config['epochs'], callbacks=[early_stop_callback])
     pdb.set_trace()
     trainer.fit(model_class)
     trainer.test(model_class)
-    return model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history
+
+    # return model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history
