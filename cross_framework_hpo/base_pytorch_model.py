@@ -103,7 +103,6 @@ class BasePytorchModel(pl.LightningModule):
             loss.append(float(x['loss']))
         avg_loss = statistics.mean(loss)
         self.training_loss_history.append(avg_loss)
-        return {'avg_train_loss': avg_loss}
 
     def validation_epoch_end(self, outputs):
         loss = []
