@@ -70,7 +70,6 @@ class BasePytorchModel(pl.LightningModule):
         x, y = train_batch
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
-        self.latest_training_loss.append(loss)
         # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "logs": {"train_loss": loss.detach()}}
 
