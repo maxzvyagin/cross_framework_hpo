@@ -70,7 +70,7 @@ class BasePytorchModel(pl.LightningModule):
         x, y = train_batch
         out = self.forward(x)
         loss = self.criterion(out, y.long().flatten())
-        # self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("train_loss", loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "logs": {"train_loss": loss.detach()}}
 
     def validation_step(self, val_batch, batch_idx):
@@ -80,6 +80,8 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
+        self.log("val_loss", loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("val_acc", acc.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "val_acc": acc, "logs": {"val_loss": loss.detach(), 'val_acc': acc.detach()}}
 
     def test_step(self, test_batch, batch_idx):
@@ -88,40 +90,42 @@ class BasePytorchModel(pl.LightningModule):
         y = y.long().flatten()
         loss = self.criterion(out, y)
         acc = self.accuracy(out, y)
+        self.log("test_loss", loss.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        self.log("test_acc", acc.detach(), on_step=True, on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "test_acc": acc, "logs": {"test_loss": loss.detach(), 'test_acc': acc.detach()}}
 
-    def training_epoch_end(self, outputs):
-        loss = []
-        for x in outputs:
-            loss.append(float(x['loss']))
-        avg_loss = statistics.mean(loss)
-        self.training_loss_history.append(avg_loss)
-        return {'avg_train_loss': avg_loss}
-
-    def validation_epoch_end(self, outputs):
-        loss = []
-        for x in outputs:
-            loss.append(float(x['loss']))
-        avg_loss = statistics.mean(loss)
-        self.validation_loss_history.append(avg_loss)
-        accuracy = []
-        for x in outputs:
-            accuracy.append(float(x['val_acc']))
-        avg_accuracy = statistics.mean(accuracy)
-        return {'avg_val_loss': avg_loss, 'avg_val_acc': avg_accuracy}
-
-    def test_epoch_end(self, outputs):
-        loss = []
-        for x in outputs:
-            loss.append(float(x['loss']))
-        avg_loss = statistics.mean(loss)
-        self.test_loss = avg_loss
-        accuracy = []
-        for x in outputs:
-            accuracy.append(float(x['test_acc']))
-        avg_accuracy = statistics.mean(accuracy)
-        self.test_accuracy = avg_accuracy
-        return {'avg_test_loss': avg_loss, 'avg_test_acc': avg_accuracy}
+    # def training_epoch_end(self, outputs):
+    #     loss = []
+    #     for x in outputs:
+    #         loss.append(float(x['loss']))
+    #     avg_loss = statistics.mean(loss)
+    #     self.training_loss_history.append(avg_loss)
+    #     return {'avg_train_loss': avg_loss}
+    #
+    # def validation_epoch_end(self, outputs):
+    #     loss = []
+    #     for x in outputs:
+    #         loss.append(float(x['loss']))
+    #     avg_loss = statistics.mean(loss)
+    #     self.validation_loss_history.append(avg_loss)
+    #     accuracy = []
+    #     for x in outputs:
+    #         accuracy.append(float(x['val_acc']))
+    #     avg_accuracy = statistics.mean(accuracy)
+    #     return {'avg_val_loss': avg_loss, 'avg_val_acc': avg_accuracy}
+    #
+    # def test_epoch_end(self, outputs):
+    #     loss = []
+    #     for x in outputs:
+    #         loss.append(float(x['loss']))
+    #     avg_loss = statistics.mean(loss)
+    #     self.test_loss = avg_loss
+    #     accuracy = []
+    #     for x in outputs:
+    #         accuracy.append(float(x['test_acc']))
+    #     avg_accuracy = statistics.mean(accuracy)
+    #     self.test_accuracy = avg_accuracy
+    #     return {'avg_test_loss': avg_loss, 'avg_test_acc': avg_accuracy}
 
 def base_pytorch_function(config, supplied_model, seed):
     torch.manual_seed(seed)
