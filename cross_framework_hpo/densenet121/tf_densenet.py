@@ -9,4 +9,4 @@ def densenet_tf_objective(config, seed):
 
 if __name__ == "__main__":
     test_config = {'batch_size': 50, 'learning_rate': .001, 'epochs': 10, 'adam_epsilon': 10 ** -9}
-    res = densenet_tf_objective(test_config)
+    res = densenet_tf_objective(test_config, seed=0)
