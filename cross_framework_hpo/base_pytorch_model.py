@@ -9,6 +9,7 @@ import tensorflow as tf
 import sys
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
+
 class CIFAR10Dataset(torch.utils.data.Dataset):
     def __init__(self, split):
         self.split = split
@@ -32,6 +33,7 @@ class CIFAR10Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
         return self.images[i].astype("float32"), self.targets[i]
+
 
 class BasePytorchModel(pl.LightningModule):
     def __init__(self, config):
@@ -95,38 +97,38 @@ class BasePytorchModel(pl.LightningModule):
         self.log("test_acc", acc.detach(), on_epoch=True, prog_bar=True, logger=True)
         return {"loss": loss, "test_acc": acc, "logs": {"test_loss": loss.detach(), 'test_acc': acc.detach()}}
 
-    # def training_epoch_end(self, outputs):
-    #     loss = []
-    #     for x in outputs:
-    #         loss.append(float(x['loss']))
-    #     avg_loss = statistics.mean(loss)
-    #     self.training_loss_history.append(avg_loss)
-    #     return {'avg_train_loss': avg_loss}
-    #
-    # def validation_epoch_end(self, outputs):
-    #     loss = []
-    #     for x in outputs:
-    #         loss.append(float(x['loss']))
-    #     avg_loss = statistics.mean(loss)
-    #     self.validation_loss_history.append(avg_loss)
-    #     accuracy = []
-    #     for x in outputs:
-    #         accuracy.append(float(x['val_acc']))
-    #     avg_accuracy = statistics.mean(accuracy)
-    #     return {'avg_val_loss': avg_loss, 'avg_val_acc': avg_accuracy}
-    #
-    # def test_epoch_end(self, outputs):
-    #     loss = []
-    #     for x in outputs:
-    #         loss.append(float(x['loss']))
-    #     avg_loss = statistics.mean(loss)
-    #     self.test_loss = avg_loss
-    #     accuracy = []
-    #     for x in outputs:
-    #         accuracy.append(float(x['test_acc']))
-    #     avg_accuracy = statistics.mean(accuracy)
-    #     self.test_accuracy = avg_accuracy
-    #     return {'avg_test_loss': avg_loss, 'avg_test_acc': avg_accuracy}
+    def training_epoch_end(self, outputs):
+        loss = []
+        for x in outputs:
+            loss.append(float(x['loss']))
+        avg_loss = statistics.mean(loss)
+        self.training_loss_history.append(avg_loss)
+        return {'avg_train_loss': avg_loss}
+
+    def validation_epoch_end(self, outputs):
+        loss = []
+        for x in outputs:
+            loss.append(float(x['loss']))
+        avg_loss = statistics.mean(loss)
+        self.validation_loss_history.append(avg_loss)
+        accuracy = []
+        for x in outputs:
+            accuracy.append(float(x['val_acc']))
+        avg_accuracy = statistics.mean(accuracy)
+        self.validation_acc_history.append(avg_accuracy)
+
+    def test_epoch_end(self, outputs):
+        loss = []
+        for x in outputs:
+            loss.append(float(x['loss']))
+        avg_loss = statistics.mean(loss)
+        self.test_loss = avg_loss
+        accuracy = []
+        for x in outputs:
+            accuracy.append(float(x['test_acc']))
+        avg_accuracy = statistics.mean(accuracy)
+        self.test_accuracy = avg_accuracy
+
 
 def base_pytorch_function(config, supplied_model, seed):
     torch.manual_seed(seed)
@@ -139,8 +141,8 @@ def base_pytorch_function(config, supplied_model, seed):
     except:
         print("WARNING: training on CPU only, GPU[0] not found.")
         trainer = pl.Trainer(max_epochs=config['epochs'], callbacks=[early_stop_callback])
-    pdb.set_trace()
     trainer.fit(model_class)
     trainer.test(model_class)
-    return trainer.logged_metrics['test_acc'], model_class.model, trainer.logged_metrics['train_loss']
-    # return model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history
+    return model_class.test_accuracy, model_class.model, model_class.training_loss_history, \
+           model_class.validation_loss_history, model_class.validation_acc_history, \
+           len(model_class.training_loss_history)
