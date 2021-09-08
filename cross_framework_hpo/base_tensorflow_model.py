@@ -22,4 +22,5 @@ def base_tensorflow_function(config, model, seed):
                     validation_data=(x_val, y_val), callbacks=[callback])
     training_loss_history = res.history['loss']
     res_test = model.evaluate(x_test, y_test)
-    return res_test[1], model, training_loss_history, len(training_loss_history)
+    test_accuracy = res_test[1]
+    return test_accuracy, model, training_loss_history, len(training_loss_history)

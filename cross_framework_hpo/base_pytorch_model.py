@@ -142,5 +142,5 @@ def base_pytorch_function(config, supplied_model, seed):
     pdb.set_trace()
     trainer.fit(model_class)
     trainer.test(model_class)
-
+    return trainer.logged_metrics['test_acc'], model_class.model, trainer.logged_metrics['train_loss']
     # return model_class.test_accuracy, model_class.model, model_class.avg_training_loss_history
