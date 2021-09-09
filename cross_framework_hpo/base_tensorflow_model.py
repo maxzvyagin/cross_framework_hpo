@@ -16,7 +16,7 @@ def base_tensorflow_function(config, model, seed):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(),
                   metrics=['accuracy'])
 
-    callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3)
+    callback = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=50)
 
     res = model.fit(x_train, y_train, epochs=config['epochs'], batch_size=int(config['batch_size']), shuffle=False,
                     validation_data=(x_val, y_val), callbacks=[callback])
