@@ -27,27 +27,41 @@ def dual_train(config, extra_data_dir):
     # three random seeds
     search_results = dict()
     for i in [0, 77, 1234]:
-
-        pt_test_acc, pt_model, pt_training_history = PT_OBJECTIVE(config, seed=i)
+        pt_test_acc, pt_model, pt_training_history, pt_val_loss, pt_val_acc, num_real_epochs = PT_OBJECTIVE(config,
+                                                                                                            seed=i)
         pt_model.eval()
         search_results['pt_test_acc_seed{}'.format(i)] = pt_test_acc
         search_results['pt_training_loss_seed{}'.format(i)] = pt_training_history
+        search_results['pt_val_loss_seed{}'.format(i)] = pt_val_loss
+        search_results['pt_val_acc_seed{}'.format(i)] = pt_val_acc
+        search_results['pt_actual_num_epochs_seed{}'.format(i)] = num_real_epochs
+        search_results['pt_stopped_early_bool_seed{}'.format(i)] = num_real_epochs == config['epochs']
         # save torch model
         torch.save(pt_model.state_dict(), model_directory + '_pt_model_seed{}.pt'.format(i))
         # wandb logging
         data = [[x, y] for (x, y) in zip(list(range(len(pt_training_history))), pt_training_history)]
         table = wandb.Table(data=data, columns=["epochs", "training_loss"])
-        wandb.log({"PT Latest Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss",
-                                                                                title="PT Training Loss"
-                                                                                      "Loss")})
+        wandb.log({"PT Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss",
+                                                                         title="PT Training Loss Seed {}".format(i))})
+
+        data = [[x, y] for (x, y) in zip(list(range(len(pt_val_loss))), pt_val_loss)]
+        table = wandb.Table(data=data, columns=["epochs", "validation_loss"])
+        wandb.log({"PT Validation Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "validation_loss",
+                                                                           title="PT Validation Loss Seed {}".format(
+                                                                               i))})
+
+        data = [[x, y] for (x, y) in zip(list(range(len(pt_val_acc))), pt_val_acc)]
+        table = wandb.Table(data=data, columns=["epochs", "validation_acc"])
+        wandb.log({"PT Validation Acc Seed {}".format(i): wandb.plot.line(table, "epochs", "validation_acc",
+                                                                           title="PT Validation Acc Seed {}".format(
+                                                                               i))})
 
         # to prevent weird OOM errors
         del pt_model
         torch.cuda.empty_cache()
 
     for i in [0, 77, 1234]:
-
-        tf_test_acc, tf_model, tf_training_history, num_epochs_run = TF_OBJECTIVE(config, seed=i)
+        tf_test_acc, tf_model, tf_training_history, tf_val_loss, tf_val_acc,  num_epochs_run = TF_OBJECTIVE(config, seed=i)
         tf_model.save(model_directory + 'tf_model_seed{}'.format(i))
 
         pt_test_acc = search_results['pt_test_acc_seed{}'.format(i)]
@@ -57,12 +71,28 @@ def dual_train(config, extra_data_dir):
         search_results['tf_test_acc_seed{}'.format(i)] = tf_test_acc
         search_results['accuracy_diff_seed{}'.format(i)] = accuracy_diff
         search_results['tf_training_loss_seed{}'.format(i)] = tf_training_history
-        search_results['tf_num_epochs_run_seed{}'.format(i)] = num_epochs_run
+        search_results['tf_val_loss_seed{}'.format(i)] = tf_val_loss
+        search_results['tf_val_acc_seed{}'.format(i)] = tf_val_acc
+        search_results['tf_actual_num_epochs_seed{}'.format(i)] = num_epochs_run
+
 
         # log custom training and validation curve charts to wandb
         data = [[x, y] for (x, y) in zip(list(range(len(tf_training_history))), tf_training_history)]
         table = wandb.Table(data=data, columns=["epochs", "training_loss"])
-        wandb.log({"TF Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss", title="TF Training Loss")})
+        wandb.log({"TF Training Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "training_loss",
+                                                                         title="TF Training Loss")})
+
+        data = [[x, y] for (x, y) in zip(list(range(len(tf_val_loss))), tf_val_loss)]
+        table = wandb.Table(data=data, columns=["epochs", "validation_loss"])
+        wandb.log({"TF Validation Loss Seed {}".format(i): wandb.plot.line(table, "epochs", "validation_loss",
+                                                                           title="TF Validation Loss Seed {}".format(
+                                                                               i))})
+
+        data = [[x, y] for (x, y) in zip(list(range(len(tf_val_acc))), tf_val_acc)]
+        table = wandb.Table(data=data, columns=["epochs", "validation_acc"])
+        wandb.log({"TF Validation Acc Seed {}".format(i): wandb.plot.line(table, "epochs", "validation_acc",
+                                                                          title="TF Validation Acc Seed {}".format(
+                                                                              i))})
 
         del tf_model
         tf.keras.backend.clear_session()

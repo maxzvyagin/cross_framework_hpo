@@ -23,5 +23,6 @@ def base_tensorflow_function(config, model, seed):
     training_loss_history = res.history['loss']
     res_test = model.evaluate(x_test, y_test)
     test_accuracy = res_test[1]
-    pdb.set_trace()
-    return test_accuracy, model, training_loss_history, len(training_loss_history)
+    return test_accuracy, model, training_loss_history, res.history['val_loss'], res.history['val_accuracy'],\
+           len(training_loss_history)
+
