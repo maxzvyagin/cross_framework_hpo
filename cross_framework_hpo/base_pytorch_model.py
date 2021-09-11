@@ -134,7 +134,7 @@ def base_pytorch_function(config, supplied_model, seed):
     model_class = BasePytorchModel(config)
     model_class.model = supplied_model
     model_class.model.train()
-    early_stop_callback = EarlyStopping(monitor="val_loss", patience=50)
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=200)
     try:
         trainer = pl.Trainer(max_epochs=config['epochs'], gpus=[0], callbacks=[early_stop_callback])
     except:
