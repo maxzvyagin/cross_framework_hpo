@@ -10,7 +10,8 @@ def base_tensorflow_function(config, model, seed):
     y_val = y_train[49000:]
     x_train = x_train[:49000]
     y_train = y_train[:49000]
-    opt = tf.keras.optimizers.Adam(learning_rate=config['learning_rate'], epsilon=config['adam_epsilon'])
+    # opt = tf.keras.optimizers.Adam(learning_rate=config['learning_rate'], epsilon=config['adam_epsilon'])
+    opt = tf.keras.optimizers.SGD(learning_rate=config['learning_rate'])
 
     model.compile(optimizer=opt,
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(),

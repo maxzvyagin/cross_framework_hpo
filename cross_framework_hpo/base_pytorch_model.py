@@ -62,8 +62,9 @@ class BasePytorchModel(pl.LightningModule):
                                            batch_size=int(self.config['batch_size']), num_workers=0, shuffle=False)
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.config['learning_rate'],
-                                     eps=self.config['adam_epsilon'])
+        # optimizer = torch.optim.Adam(self.parameters(), lr=self.config['learning_rate'],
+        #                              eps=self.config['adam_epsilon'])
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.config['learning_rate'])
         return optimizer
 
     def forward(self, x):
